@@ -1,4 +1,4 @@
-from temperature_node_2 import *
+from temperature_node_new import *
 from machine import Timer
 import network
 from esp import espnow
