@@ -48,19 +48,19 @@ import network
 from esp import espnow
 from machine import RTC
 
+global master
 
-
-# A WLAN interface must be active to send()/recv()
+### Initialization and activationn of a WLAN interface to successfully send()/recv()
 w0 = network.WLAN(network.STA_IF)  # Or network.AP_IF
 w0.active(True)
+### end
 
-
+###Initialization the ESP32 peer-to-peer protocol
 e = espnow.ESPNow()
 e.init()
-global master
 master = b'\x94\x3c\xc6\x6d\x17\x48' #94:3c:c6:6d:17:48'  # MAC address of peer's wifi interface
 e.add_peer(master)
-
+### end
 
 ### Initialization of the temperature sensor 
 sensor_pin = machine.Pin(5)
@@ -68,7 +68,6 @@ temp_sensor = ds18x20.DS18X20(onewire.OneWire(sensor_pin))
 
 DS18B20_address = temp_sensor.scan()
 ### end
-
 
 ### Initialization of the SD Card
 spi = machine.SPI(1, sck = machine.Pin(14), mosi = machine.Pin(13), miso = machine.Pin(12))
@@ -82,29 +81,32 @@ time_sample_file_name = "/sd/time_sample.txt"
 
 with open(temp_data_file_name, "a") as f:
     f.write('Temperature vs Time(sec):'+'\n')
-    print("Ind1")
     f.close()
     
 with open(time_sample_file_name, "a") as f:
     f.write('Time and Date the data was taken:'+'\n')
-    print("Ind2")
     f.close()
 ### end
-   
-   
+    
 #Intializing RTC
 rtc = RTC()
 ###end
 
 
-### Timer Interrupts - records temperature sensor data every second
+"""Description: 
+    Funtion records temperature sensor data at the frequency of the hardware timer
+Parameters:
+    Time unit t
+Returns:
+    N/A
+Throws:
+    N/A
+"""
 def read_temp_callback(t):
-    #temp_sensor.convert_temp() # Needed when we take a sample every minute
-    #time.sleep_ms(750) # Needed when we take a sample every minute
+    
     with open(temp_data_file_name, "a") as f:
         f.write(str( temp_sensor.read_temp(DS18B20_address[0]) ) + ' , '+ str(list( rtc.datetime() )[6]) + '\n')
         #f.write(str( temp_sensor.read_temp(DS18B20_address[0]) ) + ' , '+ str(list( rtc.datetime() )[5]) + '\n') # Needed when we take a sample every minute
-        print("Index 3")
         f.close()
         
     time_sample()
@@ -113,7 +115,16 @@ def read_temp_callback(t):
     return
 
 
-def time_sample(): # Print the current date and time
+"""Description: 
+    Function prints the current date and time
+Parameters:
+    None
+Returns:
+    N/A
+Throws:
+    N/A
+"""
+def time_sample(): 
     
     _date = list( rtc.datetime() )[0:4] # _date[0] = year + _date[1] = Month + _date[2] = Day
     _time = list( rtc.datetime() )[4:7] # _time[0] = hour + _time[1] = minute + _time[2] = second
@@ -129,16 +140,17 @@ def time_sample(): # Print the current date and time
     
     return
 
+
 """Description: 
     Funtion prints the current day on the basis of the rtc.datetime() index value 
 Parameters:
-    day
+    Index representing the day of the week
 Returns:
-    A string representing the day of the week
+    A string telling the day of the week
 Throws:
     N/A
 Example:
-    "temp_node_1 = temperature_sensors_data()" makes temp_node_1 = 23.625
+    "weekday(3)" gives day = "Thursday"
 """
 def weekday(day):  #Print the current day on the basis of the rtc.datetime() index value
     
@@ -170,17 +182,28 @@ Returns:
 Throws:
     N/A
 Example:
-    "temp_node_1 = temperature_sensors_data()" makes temp_node_1 = 23.625
+    "temp_node = temperature_sensors_data()" makes temp_node = 23.625
 """
 def temperature_sensors_data(): 
     
-    temp_sensor.convert_temp() 
-    time.sleep_ms(750)
+    temp_sensor.convert_temp()   # Needed when we take a sample every minute
+    time.sleep_ms(750)          # Needed when we take a sample every minute
 
     return temp_sensor.read_temp(DS18B20_address[0])
 
 
-
+"""
+Description: 
+    Funtion sends the temperature read by the sensor to the main processor
+Parameters:
+    Value of temperature in Celsius
+Returns:
+    A float representing the temperature in Celsius read by the sensor 
+Throws:
+    N/A
+Example:
+    "temperature_send(23.625)" gives 23.625
+"""
 def temperature_send(temp_node):
      
      e.send(master, str(int(temp_node * 10000)), True)
