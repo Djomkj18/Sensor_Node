@@ -36,7 +36,7 @@ Useful Code Snippets for the SD Card Module:
     vfs = os.VfsFat(sdcard)
     os.mount(vfs, "/sd")
 """
-
+iimport machine
 import onewire # OneWire communication for the sensor
 import ds18x20 # The sensor the team has
 import time # Needed because the sensor ".convert_temp()" function needs "time.sleep_ms(750)" to work
@@ -46,7 +46,7 @@ import sdcard
 import network
 
 from esp import espnow
-from machine import RTC, Pin, SPI
+from machine import RTC
 
 
 
@@ -63,7 +63,7 @@ e.add_peer(master)
 
 
 ### Initialization of the temperature sensor 
-sensor_pin = Pin(5)
+sensor_pin = machine.Pin(5)
 temp_sensor = ds18x20.DS18X20(onewire.OneWire(sensor_pin)) 
 
 DS18B20_address = temp_sensor.scan()
@@ -71,21 +71,23 @@ DS18B20_address = temp_sensor.scan()
 
 
 ### Initialization of the SD Card
-spi = SPI(1, sck = Pin(14), mosi = Pin(13), miso = Pin(12))
-cs = Pin(18)
+spi = machine.SPI(1, sck = machine.Pin(14), mosi = machine.Pin(13), miso = machine.Pin(12))
+cs = machine.Pin(18)
 sdcard = sdcard.SDCard(spi, cs)
 vfs = os.VfsFat(sdcard)
 os.mount(vfs, "/sd")
 
-temp_data_file_name = "/sd/temp_data_1.txt"
-time_sample_file_name = "/sd/time_sample_1.txt"
+temp_data_file_name = "/sd/temp_data.txt"
+time_sample_file_name = "/sd/time_sample.txt"
 
 with open(temp_data_file_name, "a") as f:
     f.write('Temperature vs Time(sec):'+'\n')
+    print("Ind1")
     f.close()
     
 with open(time_sample_file_name, "a") as f:
     f.write('Time and Date the data was taken:'+'\n')
+    print("Ind2")
     f.close()
 ### end
    
@@ -99,12 +101,12 @@ rtc = RTC()
 def read_temp_callback(t):
     #temp_sensor.convert_temp() # Needed when we take a sample every minute
     #time.sleep_ms(750) # Needed when we take a sample every minute
-    
     with open(temp_data_file_name, "a") as f:
         f.write(str( temp_sensor.read_temp(DS18B20_address[0]) ) + ' , '+ str(list( rtc.datetime() )[6]) + '\n')
         #f.write(str( temp_sensor.read_temp(DS18B20_address[0]) ) + ' , '+ str(list( rtc.datetime() )[5]) + '\n') # Needed when we take a sample every minute
-        f.close()        
-    
+        print("Index 3")
+        f.close()
+        
     time_sample()
 
     temp_sensor.convert_temp() # Needed when we take a sample every sec
@@ -122,7 +124,7 @@ def time_sample(): # Print the current date and time
     time = str(_time[0]) + ':' + str(_time[1]) + ' & ' + str(_time[2]) + ' seconds'
 
     with open(time_sample_file_name, "a") as f:
-        f.write( time + ' | ' + date + '\n') 
+        f.write( time + ' | ' + date + '\n')
         f.close()
     
     return
@@ -184,5 +186,3 @@ def temperature_send(temp_node):
      e.send(master, str(int(temp_node * 10000)), True)
      print(temp_node)
      time.sleep(1)
-
-    
