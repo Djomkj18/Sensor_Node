@@ -76,9 +76,9 @@ sdcard = sdcard.SDCard(spi, cs)
 vfs = os.VfsFat(sdcard)
 os.mount(vfs, "/sd")
 
+raw_data_file_name =  "/sd/raw_temp_data.txt"
 temp_data_file_name = "/sd/temp_data.txt"
 time_sample_file_name = "/sd/time_sample.txt"
-raw_data_file_name =  "/sd/raw_temp_data.txt"
 
 with open(raw_data_file_name, "a") as f:
     f.write('Raw Temperature Data'+'\n')
