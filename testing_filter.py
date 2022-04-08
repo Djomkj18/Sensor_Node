@@ -19,7 +19,7 @@ def median_filter(_data, filter_size):
         temp = []
     return _data
 
-filter_size = 8
+filter_size = 7
 
 data = []
 count = 0

@@ -36,7 +36,7 @@ Useful Code Snippets for the SD Card Module:
     vfs = os.VfsFat(sdcard)
     os.mount(vfs, "/sd")
 """
-iimport machine
+import machine
 import onewire # OneWire communication for the sensor
 import ds18x20 # The sensor the team has
 import time # Needed because the sensor ".convert_temp()" function needs "time.sleep_ms(750)" to work
@@ -110,8 +110,9 @@ def read_temp_callback(t):
         f.close()
         
     time_sample()
-
+    
     temp_sensor.convert_temp() # Needed when we take a sample every sec
+    
     return
 
 
@@ -132,10 +133,10 @@ def time_sample():
     today = weekday(_date[3])
     
     date = str(today) + ' ' + str(_date[1]) + '/' + str(_date[2]) + '/' + str(_date[0])
-    time = str(_time[0]) + ':' + str(_time[1]) + ' & ' + str(_time[2]) + ' seconds'
+    time = str(_time[0]) + ':' + str(_time[1]) + ':' + str(_time[2]) 
 
     with open(time_sample_file_name, "a") as f:
-        f.write( time + ' | ' + date + '\n')
+        f.write( time + '  |  ' + date + '\n')
         f.close()
     
     return
