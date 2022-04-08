@@ -78,6 +78,11 @@ os.mount(vfs, "/sd")
 
 temp_data_file_name = "/sd/temp_data.txt"
 time_sample_file_name = "/sd/time_sample.txt"
+raw_data_file_name =  "/sd/raw_temp_data.txt"
+
+with open(raw_data_file_name, "a") as f:
+    f.write('Raw Temperature Data'+'\n')
+    f.close()
 
 with open(temp_data_file_name, "a") as f:
     f.write('Temperature vs Time(sec):'+'\n')
@@ -104,12 +109,21 @@ Throws:
 """
 def read_temp_callback(t):
     
-    with open(temp_data_file_name, "a") as f:
-        f.write(str( temp_sensor.read_temp(DS18B20_address[0]) ) + ' , '+ str(list( rtc.datetime() )[6]) + '\n')
-        #f.write(str( temp_sensor.read_temp(DS18B20_address[0]) ) + ' , '+ str(list( rtc.datetime() )[5]) + '\n') # Needed when we take a sample every minute
+    flag = 0
+    
+    with open(raw_data_file_name, "a") as f:
+        f.write(str( temp_sensor.read_temp(DS18B20_address[0]) ) + '\n')
+        
+        if len(f.readlines()) == 30: # Signal if we have 30 seconds worth of data
+            flag = 1
+            
         f.close()
         
     time_sample()
+    
+    if flag == 1: # Need a flag because we need to f.close() before filtering data
+        filter_the_data() # Filter 30 seconds worth of data
+        flag = 0
     
     temp_sensor.convert_temp() # Needed when we take a sample every sec
     
@@ -140,6 +154,66 @@ def time_sample():
         f.close()
     
     return
+
+"""Description: 
+    N/A
+Parameters:
+    N/A
+Returns:
+    N/A
+Throws:
+    N/A
+"""
+def median_filter(_data, filter_size):
+    temp = []
+    indexer = filter_size // 2
+    for i in range(len(_data)):
+        for z in range(filter_size):
+            if i + z - indexer < 0 or i + z - indexer > len(_data) - 1:
+                for c in range(filter_size):
+                    temp.append(0)
+            else:
+                for k in range(filter_size):
+                    temp.append(_data[i + z - indexer])
+
+        temp.sort()
+        _data[i] = temp[len(temp) // 2]
+        temp = []
+    return _data
+
+"""Description: 
+    N/A
+Parameters:
+    N/A
+Returns:
+    N/A
+Throws:
+    N/A
+"""
+def filter_the_data():
+    
+    # Gather the temperature sensor data | 30 samples 
+    raw_data = []
+    with open(raw_data_file_name, "r") as f:
+        for line in f:
+            raw_data.append(float(line.split()[0]))
+        f.close()
+    
+    # Filter the data
+    filtered_data = median_filter(raw_data, 7)
+    
+    # Save filtered data 
+    with open(temp_data_file_name, "a") as f:
+        for number in filtered_data:
+            f.write(str(number)+'\n')
+        f.close()
+
+    # Clear the raw data file
+    with open(raw_data_file_name, 'r+') as f:   
+        f.truncate(0)
+        f.close()
+    
+    return 
 
 
 """Description: 

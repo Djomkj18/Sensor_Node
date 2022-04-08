@@ -21,7 +21,15 @@ def median_filter(_data, filter_size):
 
 filter_size = 7
 
-data = []
+#data = [26.5625, 26.5625, 26.5625, 26.5000, 26.5625, 26.5625, 26.5625, 26.5625, 26.5625, 26.5000, 26.5625, 26.5000, 26.5000, 26.5000, 26.5000, 26.5625, 26.5000, 26.5000, 26.5000, 26.5625, 26.5000, 26.5625, 26.5625]
+#data = [26.5625, 26.5625, 26.5625, 26.5000, 26.5625, 26.5625, 26.5625, 2]
+print(data)
+
+filtered_data = median_filter(data, filter_size)
+
+print(filtered_data)
+
+'''
 count = 0
 with open('data_for_test.txt', "r") as f: # 400 to 750 
     for line in f:
@@ -40,6 +48,7 @@ with open('data_for_test.txt', "r") as f: # 400 to 750
 
     f.close()
 print('**END**')
+'''
 
 '''
 data = []
