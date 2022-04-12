@@ -269,11 +269,12 @@ def temperature_sensors_data():
 
 """
 Description: 
-    Funtion sends the temperature read by the sensor to the main processor
+    Funtion sends the temperature read by the sensor to the main processor.
+    If the data was not received then the function keeps trying until the meesage was received.
 Parameters:
     Value of temperature in Celsius
 Returns:
-    A float representing the temperature in Celsius read by the sensor 
+    No Return  
 Throws:
     N/A
 Example:
