@@ -80,10 +80,6 @@ raw_data_file_name =  "/sd/raw_temp_data.txt"
 temp_data_file_name = "/sd/temp_data.txt"
 time_sample_file_name = "/sd/time_sample.txt"
 
-with open(raw_data_file_name, "a") as f:
-    f.write('Raw Temperature Data'+'\n')
-    f.close()
-
 with open(temp_data_file_name, "a") as f:
     f.write('Temperature vs Time(sec):'+'\n')
     f.close()
@@ -110,12 +106,19 @@ Throws:
 def read_temp_callback(t):
     
     flag = 0
+    line_count = 0
     
     with open(raw_data_file_name, "a") as f:
         f.write(str( temp_sensor.read_temp(DS18B20_address[0]) ) + '\n')
+            
+        f.close()
         
-        if len(f.readlines()) == 30: # Signal if we have 30 seconds worth of data
-            flag = 1
+    with open(raw_data_file_name, "r") as f:
+        for line in f:
+            line_count += 1        
+            if line_count == 30: # Signal if we have 30 seconds worth of data
+                flag = 1
+                line_count = 0
             
         f.close()
         
@@ -196,7 +199,7 @@ def filter_the_data():
     raw_data = []
     with open(raw_data_file_name, "r") as f:
         for line in f:
-            raw_data.append(float(line.split()[0]))
+            raw_data.append(float(line))
         f.close()
     
     # Filter the data
@@ -208,11 +211,9 @@ def filter_the_data():
             f.write(str(number)+'\n')
         f.close()
 
-    # Clear the raw data file
-    with open(raw_data_file_name, 'r+') as f:   
-        f.truncate(0)
-        f.close()
-    
+    # Errase the raw data file
+    os.remove(raw_data_file_name)
+     
     return 
 
 
