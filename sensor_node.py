@@ -280,7 +280,11 @@ Example:
     "temperature_send(23.625)" gives 23.625
 """
 def temperature_send(temp_node):
+    
+    acknowledgement = False
+    
+    while acknowledgement == False:
+        acknowledgement = e.send(master, str(int(temp_node * 10000)), True)
+        time.sleep(1)
      
-     e.send(master, str(int(temp_node * 10000)), True)
-     print(temp_node)
-     time.sleep(1)
+    #print(temp_node)
