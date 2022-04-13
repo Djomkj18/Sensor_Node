@@ -94,6 +94,7 @@ def read_temp_callback(t):
         
         temp = filter_the_data(raw_data) # Filter 30 seconds worth of data
         flag = 0
+        raw_data.clear()
         temperature_send(temp)
 
     temp_sensor.convert_temp() # Needed when we take a sample every sec
@@ -148,9 +149,8 @@ def filter_the_data(raw_data):
         temp += number
     
     temp = temp/30
-    # Erase the raw data file
-    raw_data = []
-
+    print(temp)
+    
     return temp
 
   
