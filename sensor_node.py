@@ -104,10 +104,10 @@ Throws:
     N/A
 """
 def read_temp_callback(t):
-    
+
     flag = 0
     line_count = 0
-    
+    print(index)
     with open(raw_data_file_name, "a") as f:
         f.write(str( temp_sensor.read_temp(DS18B20_address[0]) ) + '\n')
             
@@ -125,9 +125,10 @@ def read_temp_callback(t):
     time_sample()
     
     if flag == 1: # Need a flag because we need to f.close() before filtering data
-        filter_the_data() # Filter 30 seconds worth of data
+        temp = filter_the_data() # Filter 30 seconds worth of data
         flag = 0
-    
+        temperature_send(temp)
+
     temp_sensor.convert_temp() # Needed when we take a sample every sec
     
     return
@@ -207,14 +208,17 @@ def filter_the_data():
     
     # Save filtered data 
     with open(temp_data_file_name, "a") as f:
+        temp = 0
         for number in filtered_data:
+            temp += number
             f.write(str(number)+'\n')
         f.close()
-
+        temp = temp/30
+    print(temp)
     # Errase the raw data file
     os.remove(raw_data_file_name)
-     
-    return 
+  
+    return temp
 
 
 """Description: 
@@ -250,26 +254,6 @@ def weekday(day):  #Print the current day on the basis of the rtc.datetime() ind
   
 """
 Description: 
-    Funtion reads the temperature from the DS18B20 sensor 
-Parameters:
-    None
-Returns:
-    A float representing the temperature the sensor read 
-Throws:
-    N/A
-Example:
-    "temp_node = temperature_sensors_data()" makes temp_node = 23.625
-"""
-def temperature_sensors_data(): 
-    
-    temp_sensor.convert_temp()   # Needed when we take a sample every minute
-    time.sleep_ms(750)          # Needed when we take a sample every minute
-
-    return temp_sensor.read_temp(DS18B20_address[0])
-
-
-"""
-Description: 
     Funtion sends the temperature read by the sensor to the main processor.
     If the data was not received then the function keeps trying until the meesage was received.
 Parameters:
@@ -287,6 +271,5 @@ def temperature_send(temp_node):
     
     while acknowledgement == False:
         acknowledgement = e.send(master, str(int(temp_node * 10000)), True)
-        time.sleep(1)
-     
-    #print(temp_node)
+    
+    return
