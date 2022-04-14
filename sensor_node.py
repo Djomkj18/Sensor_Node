@@ -107,7 +107,7 @@ def read_temp_callback(t):
 
     flag = 0
     line_count = 0
-    print(index)
+
     with open(raw_data_file_name, "a") as f:
         f.write(str( temp_sensor.read_temp(DS18B20_address[0]) ) + '\n')
             
