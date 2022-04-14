@@ -214,7 +214,7 @@ def filter_the_data():
             f.write(str(number)+'\n')
         f.close()
         temp = temp/30
-    print(temp)
+    #print(temp)
     # Errase the raw data file
     os.remove(raw_data_file_name)
   
@@ -267,9 +267,21 @@ Example:
 """
 def temperature_send(temp_node):
     
-    acknowledgement = False
-    
-    while acknowledgement == False:
+    #acknowledgement = False
+    #while acknowledgement == False:
+    #    acknowledgement = e.send(master, str(int(temp_node * 10000)), True)
+        
+    # try to send the data 50 times before giving up
+    count_acknowledgements = 50
+    while count_acknowledgements > 1:
         acknowledgement = e.send(master, str(int(temp_node * 10000)), True)
-    
+        count_acknowledgements -= 1
+        if acknowledgement == True:
+            break
+        
+    # Record the data sent to the ESP in a file 
+    with open("/sd/sent_ESP_data.txt", "a") as f: 
+        f.write( str(int(temp_node * 10000)) + '\n')
+        f.close()
+        
     return
